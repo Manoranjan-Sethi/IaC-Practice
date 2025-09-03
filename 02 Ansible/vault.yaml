@@ -1,0 +1,9 @@
+- name: MyPlayboookVault
+  hosts: dev     
+  become: yes
+  vars_files:
+    - secrets.yaml
+  tasks:
+    - name: Print API key
+      debug:
+        msg: "The API key is {{ api_key }}"
