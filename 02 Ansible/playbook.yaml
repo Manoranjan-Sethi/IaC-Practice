@@ -1,0 +1,61 @@
+- name: MyNginxPlayboook   
+  hosts: dev             //group created in hosts file in ansible folder 
+                        //if we want all servers to be part of this playbook, we can use 'all' instead of 'dev'
+  become: yes              //to run commands as sudo
+  tasks:         
+    - name: Update apt cache
+      apt:
+       update_cache: yes     //This means sudo apt update
+       
+    - name: Install Nginx           
+      apt:
+        name: nginx               // This means sudo apt install nginx
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started            // This means sudo service nginx start
+
+    - name: Deploy index.html
+      copy:
+        src: index.html          //copy file from local machine to remote server
+        dest: /var/www/html
+      notify: Restart Nginx       //if this task makes any change, it will notify the handler to restart nginx
+
+                                  //handlers are like tasks but they only run when notified
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted         // This means sudo service nginx restart
+
+
+
+- name: MyNginxPlayboook
+  hosts: dev     
+  become: yes
+  tasks:
+
+
+    - name: Update apt cache
+      apt:
+       update_cache: yes
+
+    - name: Install Nginx     
+      apt:
+        name: nginx       
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started   
+
+    - name: Deploy index.html
+      copy:
+        src: index.html
+        dest: /var/www/html
+      notify: Restart Nginx    
+
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

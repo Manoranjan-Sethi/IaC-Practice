@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nimbus Cloud — Deploy in minutes</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#12031f;      /* deep plum */
+      --bg2:#0a1b4c;      /* midnight blue */
+      --hi1:#ff007a;      /* neon magenta */
+      --hi2:#00e0ff;      /* electric cyan */
+      --hi3:#ffe600;      /* punchy yellow */
+      --ink:#eaf6ff;      /* light ink */
+      --muted:#b9c7ff;
+      --glass:rgba(255,255,255,.08);
+      --stroke:rgba(255,255,255,.22);
+      --shadow:0 15px 50px rgba(0,0,0,.4);
+    }
+
+    /* Lock to one viewport, no scroll */
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--ink);
+      position: fixed; /* prevents mobile rubber-band scroll */
+      inset: 0;
+      overflow: hidden;
+      background: radial-gradient(1200px 800px at 10% 10%, #1f0640 0%, transparent 60%),
+                  radial-gradient(900px 700px at 90% 20%, rgba(0,224,255,.25) 0%, transparent 55%),
+                  linear-gradient(140deg, var(--bg1), var(--bg2) 60%);
+    }
+
+    /* Decorative neon beams */
+    .beams::before, .beams::after{
+      content:"";
+      position:absolute; inset:-20% -10%;
+      background:
+        conic-gradient(from 210deg at 20% 40%, rgba(255,0,122,.2), transparent 40%),
+        conic-gradient(from 40deg at 80% 60%, rgba(0,224,255,.18), transparent 45%);
+      filter: blur(40px) saturate(120%);
+      pointer-events:none;
+      mix-blend-mode: screen;
+    }
+
+    /* Subtle starfield */
+    .stars{
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(2px 2px at 10% 30%, rgba(255,255,255,.35) 50%, transparent 51%),
+        radial-gradient(2px 2px at 70% 20%, rgba(255,255,255,.25) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 35% 70%, rgba(255,255,255,.25) 50%, transparent 51%),
+        radial-gradient(2px 2px at 85% 75%, rgba(255,255,255,.25) 50%, transparent 51%);
+      opacity:.5;
+      pointer-events:none;
+    }
+
+    /* Floating cloud shapes */
+    .clouds{
+      position:absolute; inset:0; pointer-events:none;
+    }
+    .cloud{
+      position:absolute;
+      width:38vmin; height:18vmin;
+      background: radial-gradient(ellipse at 30% 60%, rgba(255,255,255,.35), rgba(255,255,255,0) 60%),
+                  radial-gradient(ellipse at 60% 50%, rgba(255,255,255,.25), rgba(255,255,255,0) 60%),
+                  radial-gradient(ellipse at 80% 60%, rgba(255,255,255,.2), rgba(255,255,255,0) 60%);
+      filter: blur(6px);
+      animation: drift 28s linear infinite;
+      opacity:.5;
+    }
+    .cloud.c1{ left:5%;  bottom:10%; animation-duration:36s; }
+    .cloud.c2{ right:8%; bottom:15%; animation-duration:30s; }
+    .cloud.c3{ left:25%; top:12%; width:30vmin; height:14vmin; animation-duration:40s; opacity:.35;}
+    @keyframes drift {
+      0%   { transform: translateX(-3vmin) translateY(0) }
+      50%  { transform: translateX(3vmin)  translateY(-1vmin) }
+      100% { transform: translateX(-3vmin) translateY(0) }
+    }
+
+    /* Layout */
+    .wrap {
+      position: relative;
+      min-height: 100svh; /* safe viewport height */
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: clamp(16px, 2.2vmin, 28px);
+      gap: clamp(12px, 1.6vmin, 20px);
+    }
+
+    .nav {
+      display:flex; align-items:center; justify-content:space-between;
+      z-index:2;
+    }
+    .brand {
+      display:flex; align-items:center; gap:.6rem; text-decoration:none; color:var(--ink);
+      font-family: Poppins, Inter, sans-serif; font-weight:700; letter-spacing:.4px;
+    }
+    .logo {
+      width:36px; height:36px; border-radius:12px;
+      background: linear-gradient(135deg, var(--hi1), var(--hi2));
+      box-shadow: 0 6px 20px rgba(255,0,122,.35), 0 8px 30px rgba(0,224,255,.25);
+      display:grid; place-items:center; color:black;
+      font-weight:800;
+    }
+    .pill {
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      padding: .5rem .9rem;
+      color: var(--muted);
+      font-weight:600;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: clamp(18px, 3vmin, 36px);
+      align-items:center;
+      z-index:2;
+    }
+    @media (max-width: 880px) {
+      .hero { grid-template-columns: 1fr; text-align:center; }
+      .cta { justify-content: center; }
+      .badges { justify-content:center; }
+    }
+
+    .kicker {
+      display:inline-flex; align-items:center; gap:.6rem;
+      font-weight:700; color: var(--hi3);
+      letter-spacing:.6px; text-transform: uppercase; font-size: .82rem;
+      background: rgba(255,230,0,.12); border:1px solid rgba(255,230,0,.35);
+      padding:.45rem .7rem; border-radius:999px;
+    }
+    .title {
+      font-family: Poppins, Inter, sans-serif;
+      font-size: clamp(32px, 6.2vmin, 64px);
+      line-height: 1.02;
+      margin: .6rem 0 .4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(180deg, #fff, #dffaff 60%, #a0f0ff);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      text-shadow: 0 6px 40px rgba(0,224,255,.18);
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: clamp(15px, 2.2vmin, 18px);
+      line-height: 1.45;
+      max-width: 52ch;
+      margin: .2rem 0 1.1rem;
+    }
+
+    .cta { display:flex; gap:.8rem; flex-wrap:wrap; }
+    .btn {
+      appearance:none; border:none; cursor:pointer;
+      font-weight:700; letter-spacing:.2px;
+      border-radius: 14px; padding:.9rem 1.1rem; transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--hi1), var(--hi2));
+      color:#0d0520;
+      box-shadow: 0 10px 30px rgba(255,0,122,.35), 0 12px 38px rgba(0,224,255,.25);
+    }
+    .btn.primary:hover { transform: translateY(-1px) scale(1.01); }
+    .btn.secondary {
+      background: transparent; color: var(--ink);
+      border:1px solid var(--stroke);
+      backdrop-filter: blur(8px);
+    }
+    .btn.secondary:hover { background: rgba(255,255,255,.06); }
+
+    .badges {
+      display:flex; gap:.6rem; flex-wrap:wrap; margin-top: .9rem;
+    }
+    .badge {
+      display:inline-flex; align-items:center; gap:.5rem;
+      font-weight:600; color: #ecf7ff; font-size:.9rem;
+      background: rgba(0, 224, 255, .10);
+      border:1px solid rgba(0, 224, 255, .35);
+      border-radius: 12px; padding:.5rem .7rem;
+      box-shadow: 0 6px 20px rgba(0,224,255,.12);
+      white-space: nowrap;
+    }
+    .badge .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: linear-gradient(135deg, var(--hi2), var(--hi1));
+      box-shadow: 0 0 12px rgba(0,224,255,.8);
+    }
+
+    /* Right panel: glossy card with cloud diagram */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+      border:1px solid var(--stroke);
+      border-radius: 22px;
+      padding: clamp(14px, 2vmin, 20px);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .pane {
+      display:grid; grid-template-rows: auto 1fr;
+      gap: .9rem; height: min(54vh, 420px);
+    }
+    .pane .row { display:flex; align-items:center; justify-content:space-between; gap:.8rem; }
+    .chip {
+      border:1px solid var(--stroke); background: var(--glass);
+      padding:.4rem .7rem; border-radius:10px; font-weight:600; color: var(--muted);
+    }
+
+    .diagram {
+      border-radius:16px; background: rgba(8,16,52,.6);
+      border:1px dashed rgba(255,255,255,.22);
+      position: relative; overflow:hidden;
+      display:grid; place-items:center;
+    }
+    .diagram svg { width: 100%; height: 100%; }
+
+    .footer {
+      display:flex; align-items:center; justify-content:space-between; gap:.8rem;
+      color: var(--muted); font-size:.9rem; z-index:2;
+      flex-wrap: wrap;
+      padding: 20px;
+    }
+    .providers {
+      display:flex; gap:.6rem; align-items:center; flex-wrap:wrap;
+    }
+    .providers .pill { border-color: rgba(255,255,255,.28); color:#eaf6ff; }
+
+    /* Keep everything comfortably within one screen */
+    @media (max-height: 660px) {
+      .subtitle { display:none; } /* trim non-essential copy on short screens */
+      .pane { height: min(50vh, 360px); }
+    }
+    @media (max-height: 560px) {
+      .badges { display:none; }
+      .pane { height: min(48vh, 320px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="beams"></div>
+  <div class="stars"></div>
+  <div class="clouds" aria-hidden="true">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- Top nav -->
+    <header class="nav">
+      <a class="brand" href="#">
+        <div class="logo">☁︎</div>
+        <span>Nimbus Cloud</span>
+      </a>
+      <span class="pill">Status: All systems go</span>
+    </header>
+
+    <!-- Hero -->
+    <main class="hero">
+      <section>
+        <div class="kicker">Cloud at ludicrous speed</div>
+        <h1 class="title">Deploy globally in minutes. Scale to infinity.</h1>
+        <p class="subtitle">
+          Ship from git push to global edge without the ops drag. Auto‑scaling, multi‑region failover,
+          zero‑trust by default, and observability baked in.
+        </p>
+        <div class="cta">
+          <button class="btn primary" onclick="alert('Getting Started…')">Get started — free</button>
+          <button class="btn secondary" onclick="alert('Opening Docs…')">View docs</button>
+        </div>
+        <div class="badges" aria-label="Key capabilities">
+          <div class="badge"><span class="dot"></span> Auto‑scaling</div>
+          <div class="badge"><span class="dot"></span> Multi‑region</div>
+          <div class="badge"><span class="dot"></span> Observability</div>
+          <div class="badge"><span class="dot"></span> Zero‑trust</div>
+          <div class="badge"><span class="dot"></span> Serverless</div>
+          <div class="badge"><span class="dot"></span> Kubernetes‑ready</div>
+        </div>
+      </section>
+
+      <!-- Glossy right card with cloud diagram -->
+      <aside class="card">
+        <div class="pane">
+          <div class="row">
+            <span class="chip">us‑east‑1</span>
+            <span class="chip">eu‑west‑2</span>
+            <span class="chip">ap‑south‑1</span>
+          </div>
+          <div class="diagram" role="img" aria-label="Cloud deployment diagram showing users, edge, and regions">
+            <!-- Inline SVG: Users -> Edge -> Regions -> DB -->
+            <svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#00e0ff"/>
+                  <stop offset="1" stop-color="#ff007a"/>
+                </linearGradient>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="6" result="b"/>
+                  <feMerge>
+                    <feMergeNode in="b"/><feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Users -->
+              <g transform="translate(40,150)">
+                <rect width="120" height="60" rx="12" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.3)"/>
+                <text x="60" y="37" fill="#eaf6ff" font-size="14" font-weight="600" text-anchor="middle">Users</text>
+              </g>
+
+              <!-- Edge -->
+              <g transform="translate(220,120)">
+                <rect width="120" height="60" rx="12" fill="url(#g1)" filter="url(#glow)"/>
+                <text x="60" y="37" fill="#0d0520" font-size="14" font-weight="800" text-anchor="middle">Global Edge</text>
+              </g>
+
+              <!-- Regions -->
+              <g transform="translate(420,60)">
+                <rect width="160" height="60" rx="12" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.3)"/>
+                <text x="80" y="37" fill="#eaf6ff" font-size="13" font-weight="700" text-anchor="middle">us‑east‑1</text>
+              </g>
+              <g transform="translate(420,150)">
+                <rect width="160" height="60" rx="12" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.3)"/>
+                <text x="80" y="37" fill="#eaf6ff" font-size="13" font-weight="700" text-anchor="middle">eu‑west‑2</text>
+              </g>
+              <g transform="translate(420,240)">
+                <rect width="160" height="60" rx="12" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.3)"/>
+                <text x="80" y="37" fill="#eaf6ff" font-size="13" font-weight="700" text-anchor="middle">ap‑south‑1</text>
+              </g>
+
+              <!-- Database -->
+              <g transform="translate(260,230)">
+                <rect width="120" height="60" rx="12" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.3)"/>
+                <text x="60" y="37" fill="#eaf6ff" font-size="13" font-weight="700" text-anchor="middle">Global DB</text>
+              </g>
+
+              <!-- Arrows -->
+              <g stroke="url(#g1)" stroke-width="2.5" fill="none" stroke-linecap="round" filter="url(#glow)">
+                <path d="M160,180 C190,180 210,150 220,150" />
+                <path d="M340,150 C380,120 420,110 420,110" />
+                <path d="M340,150 C380,170 420,180 420,180" />
+                <path d="M340,150 C380,210 420,270 420,270" />
+                <path d="M300,230 C300,200 300,180 300,180" />
+              </g>
+            </svg>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div>© Nimbus Cloud · Pay‑per‑request · Built for Devs</div>
+      <div class="providers" aria-label="Supported providers">
+        <span class="pill">AWS</span>
+        <span class="pill">Azure</span>
+        <span class="pill">GCP</span>
+        <span class="pill">Fly</span>
+        <span class="pill">Cloudflare</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Optional: tiny keyboard focus ring helper for better a11y on buttons
+    document.querySelectorAll('.btn').forEach(btn=>{
+      btn.addEventListener('keydown', e=>{
+        if(e.key==='Tab'){ btn.style.outline='2px solid #ffe600'; btn.style.outlineOffset='2px'; }
+      });
+      btn.addEventListener('blur', ()=>{ btn.style.outline='none'; });
+    });
+  </script>
+</body>
+</html>
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(10, 10, 10, 0.9)';
+            } else {
+                nav.style.background = 'rgba(255, 255, 255, 0.1)';
+            }
+        });
+
+        // Animate cards on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = `opacity 0.6s ease ${index * 0.2}s, transform 0.6s ease ${index * 0.2}s`;
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

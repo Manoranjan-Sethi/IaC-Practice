@@ -1,0 +1,34 @@
+- name: MyNginxPlayboook
+  hosts: dev     
+  become: yes
+  tasks:
+    - name: Nginx Block
+      block:
+        - name: Update apt cache
+          apt:
+            update_cache: yes
+
+        - name: Install Nginx     
+          apt:
+            name: nginx       
+
+        - name: Start Nginx
+          service:
+            name: ngi               //made a typo here to test block/rescue
+            state: started   
+
+        - name: Deploy index.html
+          copy:
+            src: index.html
+            dest: /var/www/html
+      
+
+        - name: Restart Nginx
+          service:
+            name: nginx
+            state: restarted
+  
+      rescue:
+        - name: Handle failure
+          debug:
+            msg: "We are cooked! The error is {{ansible_failed_task.name}}"

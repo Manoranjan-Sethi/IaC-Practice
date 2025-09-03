@@ -1,0 +1,28 @@
+- name: MyNginxPlayboook
+  hosts: dev     
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+       update_cache: yes
+
+    - name: Install Nginx     
+      apt:
+        name: nginx       
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started   
+
+    - name: Deploy index.html
+      copy:
+        src: index.html
+        dest: /var/www/html
+      notify: Restart Nginx    
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
